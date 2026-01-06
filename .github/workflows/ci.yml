@@ -21,14 +21,57 @@ jobs:
           java-version: "17"
           cache: maven
 
+      - name: Force Maven Central settings.xml
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'EOF'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <mirrors>
+              <mirror>
+                <id>central</id>
+                <name>Maven Central</name>
+                <url>https://repo.maven.apache.org/maven2</url>
+                <mirrorOf>central</mirrorOf>
+              </mirror>
+            </mirrors>
+            <profiles>
+              <profile>
+                <id>use-central</id>
+                <repositories>
+                  <repository>
+                    <id>central</id>
+                    <url>https://repo.maven.apache.org/maven2</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>false</enabled></snapshots>
+                  </repository>
+                </repositories>
+                <pluginRepositories>
+                  <pluginRepository>
+                    <id>central</id>
+                    <url>https://repo.maven.apache.org/maven2</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>false</enabled></snapshots>
+                  </pluginRepository>
+                </pluginRepositories>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>use-central</activeProfile>
+            </activeProfiles>
+          </settings>
+          EOF
+
       - name: Build & Test
-        run: mvn -B clean test
+        run: mvn -B -s ~/.m2/settings.xml clean test
 
       - name: Package
-        run: mvn -B package -DskipTests
+        run: mvn -B -s ~/.m2/settings.xml package -DskipTests
 
       - name: Upload artifact (jar)
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
           path: target/*.jar
+
