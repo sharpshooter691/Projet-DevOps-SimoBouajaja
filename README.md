@@ -1,5 +1,5 @@
 Projet DevOps 5IIR G2
-Hamza Abbas
+Mohamed Bouajaja Soussi
 ## Mini Projet DevOps
 - Application Java console (Maven)
 - CI: GitHub Actions (build + tests)
